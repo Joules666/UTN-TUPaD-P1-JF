@@ -1,0 +1,196 @@
+"""
+Práctica 8 - Manejo de Archivos
+"""
+
+import os
+
+NOMBRE_ARCHIVO = "productos.txt"
+
+# 1. Crear archivo inicial con productos:
+#    Crear un archivo de texto llamado productos.txt con tres productos.
+#    Cada línea debe tener: nombre,precio,cantidad
+def crear_archivo_inicial():
+    
+    if os.path.exists(NOMBRE_ARCHIVO):
+        print("1) El archivo productos.txt ya existe. No se modifica el contenido inicial.")
+        return
+
+    productos_iniciales = [
+        "Lapicera,120.5,30\n",
+        "Cuaderno,500.0,15\n",
+        "Regla,80.0,25\n"
+    ]
+
+    with open(NOMBRE_ARCHIVO, "w", encoding="utf-8") as archivo:
+        archivo.writelines(productos_iniciales)
+
+    print("1) Archivo productos.txt creado con productos iniciales.")
+
+
+# 2. Leer y mostrar productos:
+#    Crear un programa que abra productos.txt, lea cada línea,
+#    la procese con .strip() y .split(","), y muestre los productos en el siguiente formato:
+#    Producto: Lapicera | Precio: $120.5 | Cantidad: 30
+def leer_y_mostrar_productos():
+    
+    print("\n2) Lectura y muestra de productos:")
+
+    # Validamos existencia del archivo en lugar de usar FileNotFoundError
+    if not os.path.exists(NOMBRE_ARCHIVO):
+        print("  Error: el archivo productos.txt no existe. Ejecutá primero el punto 1.")
+        return
+
+    with open(NOMBRE_ARCHIVO, "r", encoding="utf-8") as archivo:
+        for linea in archivo:
+            linea = linea.strip()        # quitamos espacios y salto de línea
+            if not linea:
+                continue                 # salteamos líneas vacías si las hubiera
+
+            partes = linea.split(",")    # separamos por coma
+
+            if len(partes) != 3:
+                print("   Línea con formato incorrecto, se omite:", linea)
+                continue
+
+            nombre = partes[0]
+            precio = float(partes[1])
+            cantidad = int(partes[2])
+
+            print(f"   Producto: {nombre} | Precio: ${precio} | Cantidad: {cantidad}")
+
+
+# 3. Agregar productos desde teclado:
+#    Modificar el programa para que luego de mostrar los productos,
+#    le pida al usuario que ingrese un nuevo producto (nombre, precio, cantidad)
+#    y lo agregue al archivo sin borrar el contenido existente.
+def agregar_productos_desde_teclado():
+    
+    print("\n3) Agregar productos desde teclado (se guardan directamente en el archivo):")
+
+    # Si el archivo no existe todavía, lo creamos vacío
+    if not os.path.exists(NOMBRE_ARCHIVO):
+        with open(NOMBRE_ARCHIVO, "w", encoding="utf-8") as archivo:
+            pass  # se crea el archivo vacío
+
+    while True:
+        respuesta = input("   ¿Deseás agregar un nuevo producto? (s/n): ").strip().lower()
+        if respuesta != "s":
+            break
+
+        nombre = input("   Nombre del producto: ").strip()
+        # Se asume que el usuario ingresará datos válidos (según nivel de la materia)
+        precio = float(input("   Precio: "))
+        cantidad = int(input("   Cantidad: "))
+
+        with open(NOMBRE_ARCHIVO, "a", encoding="utf-8") as archivo:
+            archivo.write(f"{nombre},{precio},{cantidad}\n")
+
+        print("   Producto agregado correctamente al archivo.")
+
+    print("   Fin de la carga de productos desde teclado.")
+
+
+# 4. Cargar productos en una lista de diccionarios:
+#    Al leer el archivo, cargar los datos en una lista llamada productos,
+#    donde cada elemento sea un diccionario con claves: nombre, precio, cantidad.
+def cargar_productos_en_lista():
+   
+    print("\n4) Cargar productos desde el archivo en una lista de diccionarios:")
+    productos = []
+
+    if not os.path.exists(NOMBRE_ARCHIVO):
+        print("   Error: el archivo productos.txt no existe. Ejecutá primero el punto 1.")
+        return productos
+
+    with open(NOMBRE_ARCHIVO, "r", encoding="utf-8") as archivo:
+        for linea in archivo:
+            linea = linea.strip()
+            if not linea:
+                continue
+            partes = linea.split(",")
+            if len(partes) != 3:
+                print("   Línea con formato incorrecto, se omite:", linea)
+                continue
+
+            nombre = partes[0]
+            precio = float(partes[1])
+            cantidad = int(partes[2])
+
+            productos.append({
+                "nombre": nombre,
+                "precio": precio,
+                "cantidad": cantidad
+            })
+
+    if len(productos) == 0:
+        print("   No se cargó ningún producto (archivo vacío o con líneas incorrectas).")
+    else:
+        print("   Productos cargados correctamente en la lista.")
+        for p in productos:
+            print(f"   - {p['nombre']} | Precio: ${p['precio']} | Cantidad: {p['cantidad']}")
+
+    return productos
+
+
+# 5. Buscar producto por nombre:
+#    Pedir al usuario que ingrese el nombre de un producto.
+#    Recorrer la lista de productos y, si lo encuentra, mostrar todos sus datos.
+#    Si no existe, mostrar un mensaje de error.
+def buscar_producto_por_nombre(productos):
+    
+    print("\n5) Buscar producto por nombre:")
+    if not productos:
+        print("   La lista de productos está vacía. Verificá el punto 4.")
+        return
+
+    nombre_buscado = input("   Ingresá el nombre del producto a buscar: ").strip().lower()
+    encontrado = False
+
+    for p in productos:
+        if p["nombre"].lower() == nombre_buscado:
+            print("   Producto encontrado:")
+            print(f"   Nombre: {p['nombre']} | Precio: ${p['precio']} | Cantidad: {p['cantidad']}")
+            encontrado = True
+            break
+
+    if not encontrado:
+        print("   Error: el producto no existe en la lista.")
+
+
+# 6. Guardar los productos actualizados:
+#    Después de haber leído, buscado o agregado productos,
+#    sobrescribir el archivo productos.txt escribiendo nuevamente
+#    todos los productos actualizados desde la lista.
+def guardar_productos_actualizados(productos):
+    
+    print("\n6) Guardar los productos actualizados en el archivo:")
+    if not productos:
+        print("   No hay productos en la lista para guardar.")
+        return
+
+    with open(NOMBRE_ARCHIVO, "w", encoding="utf-8") as archivo:
+        for p in productos:
+            linea = f"{p['nombre']},{p['precio']},{p['cantidad']}\n"
+            archivo.write(linea)
+
+    print("   Archivo productos.txt sobrescrito correctamente con los productos actuales.")
+
+
+# Programa principal:
+# Se resuelven los puntos en un flujo lógico:
+# 1) Crear archivo inicial (si no existe)
+# 2) Leer y mostrar lo que haya en el archivo
+# 3) Agregar nuevos productos desde teclado (se escriben directamente)
+# 4) Cargar TODO lo que quedó en el archivo en una lista de diccionarios
+# 5) Buscar un producto por nombre utilizando la lista
+# 6) Guardar (sobrescribir) el archivo con el contenido de la lista
+def main():
+    crear_archivo_inicial()                 # Punto 1
+    leer_y_mostrar_productos()              # Punto 2
+    agregar_productos_desde_teclado()       # Punto 3
+    productos = cargar_productos_en_lista() # Punto 4
+    buscar_producto_por_nombre(productos)   # Punto 5
+    guardar_productos_actualizados(productos)  # Punto 6
+
+if __name__ == "__main__":
+    main()
